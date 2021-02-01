@@ -3,6 +3,7 @@
     alt="Vue logo"
     src="./assets/logo.png"
   >
+  <h1> Filter and sort users with VueJS  </h1>
   <HelloWorld :users="users" />
   <button
     id="btn"
@@ -94,6 +95,7 @@ export default {
   components: {
     HelloWorld,
   },
+
   data() {
     return {
       users:[],
@@ -104,6 +106,7 @@ export default {
       collapsed: true,
     }
   },
+
   computed: {
       usersFiltered() {
       return this.users.filter(user => this.genderFilter.includes(user.gender))
@@ -111,7 +114,7 @@ export default {
 
     filteredsearch () {
       return this.usersFiltered.filter((users) => {
-        return users.name.first.match(this.search);
+        return users.name.first.toLowerCase().match(this.search.toLowerCase());
       });
     },
 
@@ -157,6 +160,8 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   color: #072872;
   font-size: 20px;
+  text-align: left;
+
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -201,8 +206,9 @@ export default {
   border-radius: 1px;
 }
 
-th {
-  text-align: left;
+h1 {
+  font-size: 25px;
+  text-align: center;
+  font-weight:800;
 }
-
 </style>
