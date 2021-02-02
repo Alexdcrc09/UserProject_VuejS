@@ -3,83 +3,92 @@
     alt="Vue logo"
     src="./assets/logo.png"
   >
-  <h1> Filter and sort users with VueJS  </h1>
-  <HelloWorld :users="users" />
-  <button
-    id="btn"
-    @click="fetchUsers"
-  >
-    Fetch users <i
-      id="icon-btn"
-    />  
-  </button>
-  <label
-    id="checkbox"
-    for="male"
-  ><input
-    v-model="genderFilter"
-    type="checkbox"
-    value="male"
-  > Homme</label>
-  <label
-    id="checkbox"
-    for="female"
-  >  <input
-    v-model="genderFilter"
-    type="checkbox"
-    value="female"
-  >
-    Femme</label>
-  <input
-    id="searchbox"
-    v-model="search"
-    type="text"
-    placeholder="rechercher"
-  >
+  <DispUsers msg="Welcome to Your Vue.js App" />
+  <div class="headt">
+    <button
+      class="btn btn-primary"
+      @click="fetchUsers"
+    >
+      Réupérer des utilisateurs
+    </button>
+    <label>
+      <input
+        v-model="genderFilter"
+        type="checkbox"
+        value="male"
+      >
+      Hommes
+    </label>
+    <label>
+      <input
+        v-model="genderFilter"
+        type="checkbox"
+        value="female"
+      >
+      Femmes
+    </label>
+    <label>
+      Rechercher :
+      <input
+        v-model="search"
+        type="text"
+        placeholder="Rechercher"
+      >
+    </label>  
+    <label>Trier par âge :          
+    </label>
+    <p v-if="sortDirection === ''">
+      Par défaut
+    </p>
+    <p v-if="sortDirection === 'asc'">
+      Croissant
+    </p>
+    <p v-if="sortDirection === 'desc'">
+      Décroissant
+    </p>
+  </div>
+  <p v-if="users.length">
+    il y a <strong>{{ searchedUsers.length }}</strong> utilisateurs
+  </p>
+  <p v-else>
+    il n'y a <strong>aucun</strong> utilisateur
+  </p>
   <table
-    id="tbl-users"
+    v-if="users.length"
     class="table table-hover"
   >
     <thead>
       <tr>
-        <th>Image</th>
+        <th>Photo</th>
+        <th>Nom</th>
+        <th>Email</th>
+        <th>Tel</th>
+        <th>Genre</th>
         <th>
-          Nom
-        </th>
-        <th>
-          Prenom
-        </th>
-        <th>
-          Email
-        </th>
-        <th>
-          Genre
-        </th>
-        <th>
-          Tel
-        </th>
-        <th
-          id="th-click"
-          @click="sort('age')"
-        >
-          Âge <i
-            :class="[collapsed ? 'fa-chevron-up' : 'fa-chevron-down', 'fa']"
-            @click=" collapsed = !collapsed" 
-          />
+          <button
+            class="btn btn-light"
+            @click="changeSort"
+          >
+            Âge
+            <i
+              v-if="sortDirection"
+              class="fa"
+              :class="[ sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down' ]"
+            />
+          </button>
         </th>
       </tr>
     </thead>
     <tbody>
       <tr
-        v-for="user in sortedUsers "
+        v-for="user in searchedUsers"
         :key="user.email"
       >
         <td><img :src="user.picture.thumbnail"></td>
-        <td>{{ user.name.first }}</td>
-        <td>{{ user.name.last }}</td>
+        <td>{{ user.name.first }} {{ user.name.last }}</td>
         <td>{{ user.email }}</td>
-        <td>{{ user.gender }}</td>
         <td>{{ user.phone }}</td>
+        <td>{{ user.gender }}</td>
         <td>{{ user.dob.age }}</td>
       </tr>
     </tbody>
@@ -87,128 +96,85 @@
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
 import axios from 'axios'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld,
   },
-
   data() {
     return {
-      users:[],
-      genderFilter : ['male', 'female'],
+      users: [],
+      errored: false,
+      genderFilter: ['male', 'female'],
       search: '',
-      currentSort:'age',
-      currentSortDir:'asc',
-      collapsed: true,
+      sortDirection: ''
     }
   },
-
   computed: {
-      usersFiltered() {
-      return this.users.filter(user => this.genderFilter.includes(user.gender))
+    searchedUsers() {
+      return this.users
+      .filter((user) => this.genderFilter.includes(user.gender))
+      .filter((user) => {
+        return (user.name.first.toLowerCase().includes(this.search.toLowerCase())) ||
+        (user.name.last.toLowerCase().includes(this.search.toLowerCase()))
+      })
+      .sort((a,b) => {
+        if (!this.sortDirection) return 0;
+        const  modifier = this.sortDirection === 'desc' ? -1 : 1;
+        return (a.dob.age - b.dob.age) * modifier;
+      })
     },
-
-    filteredsearch () {
-      return this.usersFiltered.filter((users) => {
-        return users.name.first.toLowerCase().match(this.search.toLowerCase());
-      });
-    },
-
-    sortedUsers:function() {
-      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
-      return this.filteredsearch.sort((a,b) => {
-        let modifier = 1;
-        if(this.currentSortDir === 'desc') modifier = -1;
-        if( a.dob.age < b.dob.age ) return -1 * modifier;
-        if( a.dob.age > b.dob.age ) return 1 * modifier;
-        return 0;
-      });
-    }
-
   },
+  created(){ this.fetchUsers()},
+  
   methods: {
-    fetchUsers() {
+    fetchUsers() { 
       axios
         .get('https://randomuser.me/api/?results=20')
         .then(response => {
-          this.users.push.apply(this.users,response.data.results)
+         this.users = [...this.users, ...response.data.results]
+         //this.users = this.users.concat(response.data.results)
         })
         .catch(error => {
-            console.log(error)
-            this.errored = true
-          })
+          console.error(error)
+          this.errored = true
+        })
     },
-
-    sort:function(s) {
-      //if s == current sort, reverse
-      if(s === this.currentSort) {
-        this.currentSortDir = this.currentSortDir==='asc'?'desc':'asc';
+    changeSort() {
+      if (this.sortDirection === ''){
+        this.sortDirection = 'asc'
+        return this.users
+      }else if (this.sortDirection === 'asc'){
+        this.sortDirection = 'desc'
+      } else if (this.sortDirection === 'desc'){
+        this.sortDirection = ''
       }
-      this.currentSort = s;
     },
-    
   },
+  
 }
+
 </script>
 
 <style>
-* {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  color: #072872;
-  font-size: 20px;
-  text-align: left;
-
-}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #072872;
+  color: #2c3e50;
   margin-top: 60px;
 }
-#checkbox {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  color: #072872;
-  font-size: 20px;
-  margin: 20px;
-  font-weight: 700;
-  cursor: pointer;
-
+.headt{
+  display: flex;
+  justify-content: space-around;
 }
-#btn {
-  background-color: white;
-  color: #072872;
-  border: 2px solid #072872;
-  border-radius: 5px;
-  font-size: 20px;
-  transition-duration: 0.4s;
-  cursor: pointer;
+.btn-primary{
+  background-color: #41B883!important;
+  border-color: #41B883!important;
 }
-#btn:hover {
-  background-color: #072872;
-  color: white;
-}
-
-#searchbox {
-  margin-right: 10px;
-  padding: 0px 5px;
-  border-radius: 5px;
-  border-color: #072872;
-}
-
-#th-click {
-  cursor: pointer;
-  border-radius: 1px;
-}
-
-h1 {
-  font-size: 25px;
-  text-align: center;
-  font-weight:800;
+.btn-primary:hover{
+  background-color: #35495E!important;
 }
 </style>
