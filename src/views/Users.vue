@@ -12,6 +12,7 @@
         v-model="genderFilter"
         type="checkbox"
         value="male"
+        :disabled="genderFilter.length<2 && genderFilter.includes('male')"
       >
       Hommes
     </label>
@@ -20,6 +21,7 @@
         v-model="genderFilter"
         type="checkbox"
         value="female"
+        :disabled="genderFilter.length<2 && genderFilter.includes('female')"
       >
       Femmes
     </label>
@@ -30,21 +32,20 @@
         type="text"
         placeholder="Rechercher"
       >
-    </label>  
-    <label>Trier par âge :          
-    </label>
-    <p v-if="sortDirection === ''">
-      Par défaut
-    </p>
-    <p v-if="sortDirection === 'asc'">
-      Croissant
-    </p>
-    <p v-if="sortDirection === 'desc'">
-      Décroissant
-    </p>
+    </label> 
+    <button
+      class="btn btn-primary"
+      @click="resetFilters"
+    >
+      Reset filtre
+    </button> 
+    <label />
+    <p v-if="sortDirection === ''" />
+    <p v-if="sortDirection === 'asc'" />
+    <p v-if="sortDirection === 'desc'" />
   </div>
   <p v-if="users.length">
-    il y a <strong>{{ searchedUsers.length }}</strong> utilisateurs
+    il y a <strong>{{ searchedUsers.length }}</strong> utilisateur{{ searchedUsers.length > 1 ? 's' : '' }} filtré{{ searchedUsers.length > 1 ? 's' : '' }} sur {{ users.length }} totaux
   </p>
   <p v-else>
     il n'y a <strong>aucun</strong> utilisateur
@@ -97,15 +98,15 @@ import axios from 'axios'
 export default {
   name: 'App',
   components: {
-    
   },
+
   data() {
     return {
       users: [],
       errored: false,
-      genderFilter: ['male', 'female'],
-      search: '',
-      sortDirection: ''
+      genderFilter: (this.$route.query.gender || 'male,female').split(','),
+      search: this.$route.query.search || '',
+      sortDirection: this.$route.query.sortDirection || '',
     }
   },
   computed: {
@@ -123,6 +124,21 @@ export default {
       })
     },
   },
+
+// affiche dans l'url le chemin :
+  watch:{
+    genderFilter() {
+      this.updateQuery()
+    },
+    search() {
+      this.updateQuery()
+    },
+    sortDirection() {
+      this.updateQuery()
+    }
+  },
+  // fetch au chargement de la page
+  //
   // created(){ this.fetchUsers()},
 
   methods: {
@@ -148,13 +164,34 @@ export default {
         this.sortDirection = ''
       }
     },
+    updateQuery () {
+      const query = {}
+      if (this.genderFilter.length < 2) {
+        query.gender = this.genderFilter.join('')
+      }
+      if (this.search) {
+        query.search = this.search
+      }
+      if (this.sortDirection) {
+        query.sort = this.sortDirection
+      }
+      this.$router.push({query})
+    },
+    resetFilters () { 
+      this.genderFilter = ['male','female'],
+      this.search = ''
+      this.sortDirection = ''
+    }
   },
-  
 }
-
 </script>
 
 <style>
+* {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  color: #2c3e50;
+  font-size: 18px;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -167,11 +204,19 @@ export default {
   display: flex;
   justify-content: space-around;
 }
-.btn-primary{
-  background-color: #41B883!important;
-  border-color: #41B883!important;
+#btn {
+  background-color: white;
+  color: #072872;
+  border: 2px solid #072872;
+  border-radius: 5px;
+  font-size: 20px;
+  transition-duration: 0.4s;
+  cursor: pointer;
 }
-.btn-primary:hover{
-  background-color: #35495E!important;
+#btn:hover {
+  background-color: #072872;
+  color: white;
+  cursor: pointer;
 }
+
 </style>
