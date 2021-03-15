@@ -101,9 +101,9 @@
         <button
           id="btn"
           class="btn btn-primary"
-          @click="save"
+          @click="Edituser"
         >
-          Sauvegarder
+          Modifier
         </button>
       </div>
     </form>
@@ -134,6 +134,12 @@ export default {
     fetchUsers() {
       axios
         .get(`http://localhost:6929/users/${this.$route.params.id}`)
+        .then(response => {this.user = response.data; console.log(this.user);}
+        )
+    },
+    Edituser() {
+      axios
+        .put(`http://localhost:6929/users/${this.$route.params.id}`,this.user)
         .then(response => {this.user = response.data; console.log(this.user);}
         )
     }
