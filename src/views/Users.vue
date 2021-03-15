@@ -1,11 +1,10 @@
 <template>
-  <DispUsers msg="Welcome to Your Vue.js App" />
   <div class="headt">
     <button
       class="btn btn-primary"
       @click="fetchUsers"
     >
-      Réupérer des utilisateurs
+      Récupérer des utilisateurs
     </button>
     <label>
       <input
@@ -39,6 +38,20 @@
     >
       Reset filtre
     </button> 
+    <router-link
+      :to="{name :
+        'AddUser'
+            
+      }"
+    >
+      <button
+        class="btn btn-primary"
+        @click="add_user"
+      >
+        Ajouter un utilisateur
+      </button> 
+    </router-link>
+
     <label />
     <p v-if="sortDirection === ''" />
     <p v-if="sortDirection === 'asc'" />
@@ -58,6 +71,7 @@
       <tr>
         <th>Photo</th>
         <th>Nom</th>
+        <th>Prenom</th>
         <th>Email</th>
         <th>Tel</th>
         <th>Genre</th>
@@ -81,12 +95,30 @@
         v-for="user in searchedUsers"
         :key="user.email"
       >
-        <td><img :src="user.picture.thumbnail"></td>
-        <td>{{ user.name.first }} {{ user.name.last }}</td>
+        <router-link
+          :to="{name :
+                  'EditUser',
+                params
+                  :
+                  {id:
+                    user.id}
+          }"
+        >
+          <td>
+            <img
+              class="img-avatar"
+              :src="user.avatarUrl"
+            >
+          </td>
+        </router-link>
+        <td>{{ user.firstName }}</td>
+        <td>{{ user.lastName }}</td>
         <td>{{ user.email }}</td>
         <td>{{ user.phone }}</td>
         <td>{{ user.gender }}</td>
-        <td>{{ user.dob.age }}</td>
+        <td>
+          {{ user.age }}
+        </td>
       </tr>
     </tbody>
   </table>
@@ -114,17 +146,16 @@ export default {
       return this.users
       .filter((user) => this.genderFilter.includes(user.gender))
       .filter((user) => {
-        return (user.name.first.toLowerCase().includes(this.search.toLowerCase())) ||
-        (user.name.last.toLowerCase().includes(this.search.toLowerCase()))
+        return (user.firstName.toLowerCase().includes(this.search.toLowerCase())) ||
+        (user.lastName.toLowerCase().includes(this.search.toLowerCase()))
       })
       .sort((a,b) => {
         if (!this.sortDirection) return 0;
         const  modifier = this.sortDirection === 'desc' ? -1 : 1;
-        return (a.dob.age - b.dob.age) * modifier;
+        return (a.age - b.age) * modifier;
       })
     },
   },
-
 // affiche dans l'url le chemin :
   watch:{
     genderFilter() {
@@ -142,11 +173,11 @@ export default {
   // created(){ this.fetchUsers()},
 
   methods: {
-    fetchUsers() { 
+    fetchUsers() {
       axios
-        .get('https://randomuser.me/api/?results=20')
+        .get('http://localhost:6929/users')
         .then(response => {
-         this.users = [...this.users, ...response.data.results]
+         this.users = [...this.users, ...response.data]
          //this.users = this.users.concat(response.data.results)
         })
         .catch(error => {
@@ -217,6 +248,16 @@ export default {
   background-color: #072872;
   color: white;
   cursor: pointer;
+}
+
+.th {
+    vertical-align: center !important;
+  }
+
+.img-avatar {
+  width:130px;
+  height: auto;
+  text-align: center;
 }
 
 </style>
