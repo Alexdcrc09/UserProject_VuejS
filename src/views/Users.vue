@@ -73,7 +73,6 @@
         <th>Nom</th>
         <th>Prenom</th>
         <th>Email</th>
-        <th>Tel</th>
         <th>Genre</th>
         <th>
           <button
@@ -88,6 +87,7 @@
             />
           </button>
         </th>
+        <th>Modifier</th>
       </tr>
     </thead>
     <tbody>
@@ -114,10 +114,22 @@
         <td>{{ user.firstName }}</td>
         <td>{{ user.lastName }}</td>
         <td>{{ user.email }}</td>
-        <td>{{ user.phone }}</td>
         <td>{{ user.gender }}</td>
         <td>
           {{ user.age }}
+        </td>
+        <td>
+          <router-link
+            :to="{name :
+                    'EditUser',
+                  params
+                    :
+                    {id:
+                      user.id}
+            }"
+          >
+            <i class="fas fa-search" />
+          </router-link>
         </td>
       </tr>
     </tbody>

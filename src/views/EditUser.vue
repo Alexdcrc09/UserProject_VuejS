@@ -3,7 +3,7 @@
   <h1>Modification de {{ this.user.firstName }}</h1>
   <br>
   <div>
-    <form>
+    <div class="form">
       <div class="form-group">
         <div
           id="container-img"
@@ -81,11 +81,11 @@
             <option value="">
               Choisissez votre genre
             </option>
-            <option value="homme">
-              Homme
+            <option value="male">
+              male
             </option>
-            <option value="femme">
-              Femme
+            <option value="female">
+              female
             </option>
           </select>
         </div>
@@ -101,12 +101,21 @@
         <button
           id="btn"
           class="btn btn-primary"
+          type="submit"
+          @click="Delete"
+        >
+          Supprimer
+        </button>
+        <button
+          id="btn"
+          class="btn btn-primary"
+          type="submit"
           @click="Edituser"
         >
           Modifier
         </button>
       </div>
-    </form>
+    </div>
   </div>
 </template>
 <script>
@@ -140,9 +149,32 @@ export default {
     Edituser() {
       axios
         .put(`http://localhost:6929/users/${this.$route.params.id}`,this.user)
-        .then(response => {this.user = response.data; console.log(this.user);}
+        .then(response => {this.user = response.data;
+        this.$toast.success(`La modification a bien été effectué`, {
+        //theme of the toast you prefer
+        theme: 'bubble',
+        //position of the toast container
+        position: 'top-right',
+        //display time of the toast
+        duration: 5000
+    })})
+    },
+    Delete() {
+      axios
+        .delete(`http://localhost:6929/users/${this.$route.params.id}`)
+        .then(response => {this.user = response.data;
+        this.$toast.success(`Vous avez bien supprimé l'utilisateur`, {
+        //theme of the toast you prefer
+        theme: 'bubble',
+        //position of the toast container
+        position: 'top-right',
+        //display time of the toast
+        duration: 5000
+    })}
         )
-    }
+        .then(setTimeout(function () { this.fetchHole(this.$router.push({ path: '/users' })) }.bind(this), 1000))
+
+    },
   }
 }
 </script>
@@ -196,7 +228,7 @@ export default {
   font-weight: 800;
 }
 
-form {
+.form {
   display: inline-block;
   width : 35%;
 }
@@ -213,7 +245,7 @@ form {
 }
 
 .img-form {
-  width:80%;
+  width:60%;
   text-align: center;
 }
 

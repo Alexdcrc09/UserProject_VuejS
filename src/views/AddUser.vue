@@ -85,11 +85,11 @@
             <option value="">
               Choisissez votre genre
             </option>
-            <option value="homme">
-              Homme
+            <option value="male">
+              male
             </option>
-            <option value="femme">
-              Femme
+            <option value="female">
+              female
             </option>
           </select>
         </div>
@@ -107,7 +107,7 @@
           class="btn btn-primary"
           @click="AddUser"
         >
-          Sauvegarder
+          Ajouter
         </button>
       </div>
     </div>
@@ -132,7 +132,15 @@ export default {
     },
       AddUser() {
         axios.post(`http://localhost:6929/users/`, this.user)
-        .then(response => console.log(response))
+        .then(response => console.log(response),this.$toast.success(`L'utilisateur a bien été ajouté`, {
+        //theme of the toast you prefer
+        theme: 'bubble',
+        //position of the toast container
+        position: 'top-right',
+        //display time of the toast
+        duration: 5000
+    }))
+     .then(setTimeout(function () { this.fetchHole(this.$router.push({ path: '/users' })) }.bind(this), 1000))
     }
   }
 }
@@ -198,7 +206,7 @@ export default {
 
 #btn {
   display: block;
-  margin-top:15px;
+  margin-top:20px !important;
 }
 
 #checkbox-gender {

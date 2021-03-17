@@ -1,6 +1,6 @@
 <template>
   <div id="nav">
-    <router-link to="/">
+    <router-link to="/users">
       Home
     </router-link> |
     <router-link to="/about">
@@ -8,6 +8,9 @@
     </router-link> |
     <router-link to="/users">
       Users
+    </router-link> |
+    <router-link to="/user">
+      Ajout d'un utilisateur
     </router-link>
   </div>
   <router-view />
