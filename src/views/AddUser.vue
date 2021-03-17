@@ -60,16 +60,7 @@
       </div>
       <div class="form-row">
         <div class="col">
-          <label
-            class="title-label"
-            for="phone"
-          >Urlphoto</label>
-          <input
-            v-model="user.avatarUrl"
-            type="text"
-            class="form-control"
-            placeholder="Modifier l'url de votre photo"
-          >
+          <file-upload />
         </div>
         <div class="col">
           <label
@@ -115,14 +106,16 @@
 </template>
 <script>
 import axios from 'axios'
+import FileUpload from '../components/FileUpload.vue'
 
 export default {
   name: 'AddUser',
   components: {
+    FileUpload
   },
 
   data() {
-    return {
+      return {
       user:{}
     }
   },
@@ -130,20 +123,25 @@ export default {
      back(){
       this.$router.go(-1);
     },
-      AddUser() {
-        axios.post(`http://localhost:6929/users/`, this.user)
-        .then(response => console.log(response),this.$toast.success(`L'utilisateur a bien été ajouté`, {
-        //theme of the toast you prefer
-        theme: 'bubble',
-        //position of the toast container
-        position: 'top-right',
-        //display time of the toast
-        duration: 5000
-    }))
-     .then(setTimeout(function () { this.fetchHole(this.$router.push({ path: '/users' })) }.bind(this), 1000))
-    }
-  }
-}
+      async AddUser() {
+        const response = await axios.post(`http://localhost:6929/users/`, this.user)
+            this.message = response.data.messageError
+              if(!this.message){
+                this.$toast.success("Utilisateur ajouté", {
+                //theme of the toast you prefer
+                theme: 'bubble',
+                //position of the toast container
+                position: 'top-right',
+                //display time of the toast
+                duration: 5000
+            }),
+                  this.$router.push({ path : '/users' });
+                } else{
+                  this.$toast.error(this.message)
+                }
+              }
+            }
+          }
 </script>
 
 <style>
